@@ -63,3 +63,16 @@ class SuggestionResults(AbstractBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='suggestion_results', null=True)
     prompt_data = models.JSONField()
     result_data = models.JSONField()
+
+
+class Budget(AbstractBaseModel):
+    amount = models.DecimalField(default=0, decimal_places=2, max_digits=10)
+    currency = models.CharField(max_length=3, null=True)
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='budgets')
+
+
+class BudgetEntry(AbstractBaseModel):
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='entries')
+    estimated_amount = models.DecimalField(default=0, decimal_places=2, max_digits=10)
+    amount_spent = models.DecimalField(default=0, decimal_places=2, max_digits=10)
+    category = models.CharField(max_length=255, choices=[(category, category) for category in BUDGET_CATEGORIES])

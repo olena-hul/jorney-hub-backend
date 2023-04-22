@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from tasks.trip_suggestion import suggest_trip_task
-from .models import Destination, Location, Trip
+from .models import Destination, Location, Trip, BudgetEntry, Budget
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -57,3 +57,34 @@ class SuggestTripSerializer(serializers.Serializer):
         return {
             "success": True
         }
+
+
+class BudgetEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BudgetEntry
+        fields = ('id', 'estimated_amount', 'amount_spent', 'category')
+
+
+class BudgetSerializer(serializers.ModelSerializer):
+    entries = BudgetEntrySerializer(many=True, required=True)
+
+    class Meta:
+        model = Budget
+        fields = ('id', 'amount', 'currency', 'trip', 'entries')
+
+    def create(self, validated_data):
+        entries = validated_data.pop('entries', [])
+        budget = Budget.objects.create(**validated_data)
+        entries_instances = [
+            BudgetEntry(**entry_data, budget=budget) for entry_data in entries
+        ]
+        BudgetEntry.objects.bulk_create(entries_instances)
+        return budget
+
+
+class BudgetUpdateSerializer(serializers.ModelSerializer):
+    entries = BudgetEntrySerializer(many=True)
+
+    class Meta:
+        model = Budget
+        fields = ('id', 'amount', 'currency', 'trip', 'entries')
