@@ -46,6 +46,7 @@ firebase_admin.initialize_app()
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -81,7 +82,6 @@ REST_FRAMEWORK = {
 }
 
 
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -98,8 +98,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "journey_hub.wsgi.application"
-
+# WSGI_APPLICATION = "journey_hub.wsgi.application"
+ASGI_APPLICATION = 'journey_hub.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -159,3 +159,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CHAT_GPT_AUTHORIZATION = os.getenv('CHAT_GPT_AUTHORIZATION')
 CHAT_GPT_COOKIE = os.getenv('CHAT_GPT_COOKIE')
+
+PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
+
+APP_HOST = os.getenv('APP_HOST')
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6381)],
+        },
+    },
+}

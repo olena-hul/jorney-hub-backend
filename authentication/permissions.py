@@ -23,3 +23,12 @@ class FirebaseAuthentication(BasePermission):
         except Exception as e:
             logger.error('Error while checking user permission:', e)
             return False
+
+
+class AnonymousOrAuthorized(FirebaseAuthentication):
+    def has_permission(self, request: Request, view):
+        authorized = super().has_permission(request, view)
+        if request.headers.get('Authorization') and not authorized:
+            return False
+
+        return True

@@ -11,7 +11,7 @@ class TripSuggestionAI(BaseAIClient):
     PROMPT_TEMPLATE = (
         """
         I have a trip to {destination_name} for dates {start_date}-{end_date}
-        My budget is {budget}$
+        My budget is {budget}{currency}
         """
         f"""
         Create a trip plan for me (places to visit, where to stay, where to eat, etc.)
@@ -41,6 +41,7 @@ class TripSuggestionAI(BaseAIClient):
             start_date=prompt_data.get('start_date'),
             end_date=prompt_data.get('end_date'),
             budget=prompt_data.get('budget'),
+            currency=prompt_data.get('currency'),
         )
 
     @staticmethod

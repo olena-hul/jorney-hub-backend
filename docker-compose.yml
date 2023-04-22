@@ -33,7 +33,7 @@ services:
 
   job-worker:
     build: .
-    command: celery -A app.celery_worker worker --loglevel=INFO -E -B
+    command: celery -A celery_worker worker --loglevel=INFO -E -B
     env_file:
       - .env
     environment:
