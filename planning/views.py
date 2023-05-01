@@ -1,13 +1,14 @@
 from rest_framework import generics
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from authentication.permissions import AnonymousOrAuthorized
-from .models import Destination, Budget, BudgetEntry
+from authentication.permissions import AnonymousOrAuthorized, FirebaseAuthentication
+from .models import Destination, Budget, BudgetEntry, Trip
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
-    BudgetUpdateSerializer
+    BudgetUpdateSerializer, TripSerializer
 
 
 class DestinationListAPIView(generics.ListAPIView):
@@ -36,7 +37,7 @@ class SuggestTripAPIView(APIView):
 class BudgetViewSet(ModelViewSet):
     queryset = Budget.objects.all()
     serializer_class = BudgetSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [FirebaseAuthentication]
 
     def get_serializer_class(self):
         if self.action == 'update':
@@ -68,3 +69,26 @@ class BudgetViewSet(ModelViewSet):
 class BudgetEntryViewSet(ModelViewSet):
     queryset = BudgetEntry.objects.all()
     serializer_class = BudgetEntrySerializer
+    permission_classes = [FirebaseAuthentication]
+
+
+class TripViewSet(ModelViewSet):
+    queryset = Trip.objects.all()
+    serializer_class = TripSerializer
+    permission_classes = [FirebaseAuthentication]
+
+    def list(self, request, *args, **kwargs):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        destination_id = request.query_params.get('destination_id')
+        user = request.user
+        
+        if start_date and end_date and destination_id:
+            self.queryset = self.queryset.filter(
+                start_date=start_date,
+                end_date=end_date,
+                destination_id=destination_id,
+                user=user,
+            )
+        
+        return super().list(request, *args, **kwargs)

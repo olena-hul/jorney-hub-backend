@@ -88,3 +88,11 @@ class BudgetUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
         fields = ('id', 'amount', 'currency', 'trip', 'entries')
+
+
+class TripSerializer(serializers.ModelSerializer):
+    budgets = BudgetSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Trip
+        fields = ('id', 'start_date', 'end_date', 'budgets', 'destination', 'user')
