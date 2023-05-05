@@ -17,7 +17,7 @@ class TripSuggestionAI(BaseAIClient):
         Create a trip plan for me (places to visit, where to stay, where to eat, etc.)
         The data should be present in JSON format with such keys:
 
-        day: day of the trip, DD-MM-YY
+        day: day of the trip, YYYY-MM-DD
         name: title of the place to visit
         description: description of the place to visit
         duration: time needed for this place(in hours)

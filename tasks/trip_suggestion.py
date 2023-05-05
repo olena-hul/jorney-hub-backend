@@ -4,7 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from celery_worker import app
-from journey_hub.constants import ATTRACTION_TYPE_CATEGORY_MAPPING
+from journey_hub.constants import ATTRACTION_TYPE_CATEGORY_MAPPING, WSEvent
 from planning.models import SuggestionResults, Attraction, Location
 from services.ai.trip_suggestion import TripSuggestionAI
 from services.image_fetcher.api import ImageFetcherAPI
@@ -13,12 +13,12 @@ from services.ws.consumer import WebsocketClient
 logger = logging.getLogger(__name__)
 
 
-def send_message_to_ws(data: dict | list):
+def send_message_to_ws(event_type: str, data: dict | list):
     client = WebsocketClient()
     channel_layer = get_channel_layer()
     client.channel_layer = channel_layer
 
-    async_to_sync(channel_layer.group_send)('events', {'type': 'event', 'data': data})
+    async_to_sync(channel_layer.group_send)('events', {'type': event_type, 'data': data})
 
 
 def process_generated_attraction(generated_attraction: dict, prompt_data: dict):
@@ -41,7 +41,8 @@ def process_generated_attraction(generated_attraction: dict, prompt_data: dict):
         "latitude": 50.4501,
         "longitude": 30.5241,
         "address": "Maidan Nezalezhnosti, Kyiv, Ukraine",
-        "category": "Historic Site"
+        "category": "Historic Site",
+        "image_urls": [..],
     }
     """
 
@@ -57,6 +58,7 @@ def process_generated_attraction(generated_attraction: dict, prompt_data: dict):
             'attraction_type': generated_attraction.get('category'),
             'destination_id': prompt_data.get('destination_id'),
             'location': location,
+            'price': generated_attraction.get('price'),
             'address': generated_attraction.get('address'),
             'duration': generated_attraction.get('duration'),
             'budget_category': ATTRACTION_TYPE_CATEGORY_MAPPING.get(generated_attraction.get('category'))
@@ -73,6 +75,9 @@ def process_generated_attraction(generated_attraction: dict, prompt_data: dict):
     response_body = {
         **generated_attraction,
         'attraction_id': attraction.id,
+        'image_urls': attraction.image_urls,
+        'budget_category': attraction.budget_category,
+        'currency': prompt_data.get('currency'),
     }
 
     return response_body
@@ -84,7 +89,7 @@ def suggest_trip_task(_, prompt_data: dict):
     result = trip_suggestion.request(prompt_data)
 
     if not result:
-        send_message_to_ws({'error': 'Error while suggesting trip. Try again'})
+        send_message_to_ws(WSEvent.TRIP_SUGGESTION, {'error': 'Error while suggesting trip. Try again'})
         logger.error('No suggestion result')
         return
 
@@ -98,7 +103,7 @@ def suggest_trip_task(_, prompt_data: dict):
         process_generated_attraction(generated_attraction, prompt_data) for generated_attraction in result
     ]
 
-    send_message_to_ws(response)
+    send_message_to_ws(WSEvent.TRIP_SUGGESTION, response)
     return response
 
 
@@ -110,4 +115,8 @@ def fetch_attraction_photos(_, attraction_id: int):
 
     if images:
         attraction.image_urls = images
+        send_message_to_ws(WSEvent.IMAGE_READY, {
+            'id': attraction.id,
+            'image_urls': images
+        })
         attraction.save()

@@ -1,14 +1,13 @@
 from rest_framework import generics
-from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from authentication.permissions import AnonymousOrAuthorized, FirebaseAuthentication
-from .models import Destination, Budget, BudgetEntry, Trip
+from authentication.permissions import FirebaseAuthentication
+from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
-    BudgetUpdateSerializer, TripSerializer
+    BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer
 
 
 class DestinationListAPIView(generics.ListAPIView):
@@ -17,9 +16,20 @@ class DestinationListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
+class AttractionListAPIView(generics.ListAPIView):
+    queryset = Attraction.objects.order_by('-views_count')
+    serializer_class = AttractionSerializer
+    permission_classes = [AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        destination_id = request.query_params.get('destination_id')
+        self.queryset = self.queryset.filter(destination__id=destination_id)
+        return super().list(request, *args, **kwargs)
+
+
 class SuggestTripAPIView(APIView):
     serializer_class = SuggestTripSerializer
-    permission_classes = [AnonymousOrAuthorized]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         data = request.data
@@ -92,3 +102,15 @@ class TripViewSet(ModelViewSet):
             )
         
         return super().list(request, *args, **kwargs)
+
+
+class TripAttractionViewSet(ModelViewSet):
+    queryset = TripAttraction.objects.all()
+    serializer_class = TripAttractionSerializer
+    permission_classes = [FirebaseAuthentication]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=201)

@@ -27,27 +27,32 @@ BUDGET_CATEGORIES = [
     'Accommodation',
     'Transportation',
     'Food and Drink',
-    'Activities and Entertainment',
+    'Activities',
     'Shopping',
     'Miscellaneous'
 ]
 
 
 ATTRACTION_TYPE_CATEGORY_MAPPING = {
-    'Museum': 'Activities and Entertainment',
-    'Art Gallery': 'Activities and Entertainment',
-    'Historic Site': 'Activities and Entertainment',
-    'Park': 'Activities and Entertainment',
-    'Zoo': 'Activities and Entertainment',
-    'Aquarium': 'Activities and Entertainment',
-    'Amusement Park': 'Activities and Entertainment',
-    'Theater': 'Activities and Entertainment',
-    'Concert Hall': 'Activities and Entertainment',
-    'Stadium': 'Activities and Entertainment',
-    'Sports Complex': 'Activities and Entertainment',
+    'Museum': 'Activities',
+    'Art Gallery': 'Activities',
+    'Historic Site': 'Activities',
+    'Park': 'Activities',
+    'Zoo': 'Activities',
+    'Aquarium': 'Activities',
+    'Amusement Park': 'Activities',
+    'Theater': 'Activities',
+    'Concert Hall': 'Activities',
+    'Stadium': 'Activities',
+    'Sports Complex': 'Activities',
     'Shopping Mall': 'Shopping',
     'Market': 'Shopping',
     'Restaurant': 'Food and Drink',
     'Bar': 'Food and Drink',
-    'Nightclub': 'Activities and Entertainment'
+    'Nightclub': 'Activities'
 }
+
+
+class WSEvent:
+    TRIP_SUGGESTION = 'trip_suggestion'
+    IMAGE_READY = 'image_ready'

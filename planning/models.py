@@ -43,6 +43,7 @@ class Attraction(AbstractBaseModel):
     rating = models.FloatField(default=0)
     ratings_count = models.IntegerField(default=0)
     views_count = models.IntegerField(default=0)
+    price = models.DecimalField(default=0, decimal_places=2, max_digits=10)
     address = models.CharField(max_length=255)
     image_urls = models.JSONField(null=True)
     duration = models.IntegerField(default=1)

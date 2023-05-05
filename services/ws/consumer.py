@@ -22,6 +22,10 @@ class WebsocketClient(BaseWebsocketConsumer):
     async def disconnect(self, close_code):
         pass
 
-    async def event(self, message):
+    async def trip_suggestion(self, message):
         logger.info(f'Sending message: {message}')
+        await self.send(json.dumps(message))
+
+    async def image_ready(self, message):
+        logger.info(f'Image ready: {message}')
         await self.send(json.dumps(message))

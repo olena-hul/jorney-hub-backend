@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from tasks.trip_suggestion import suggest_trip_task
-from .models import Destination, Location, Trip, BudgetEntry, Budget
+from .models import Destination, Location, Trip, BudgetEntry, Budget, Attraction, TripAttraction
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -20,6 +20,21 @@ class DestinationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Destination
+        fields = '__all__'
+
+
+class AttractionSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(many=False)
+
+    class Meta:
+        model = Attraction
+        fields = '__all__'
+
+
+class TripAttractionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TripAttraction
         fields = '__all__'
 
 
