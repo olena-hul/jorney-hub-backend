@@ -52,7 +52,7 @@ class Attraction(AbstractBaseModel):
 
 class TripAttraction(AbstractBaseModel):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='trip_attractions')
-    attraction = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='trip_attractions')
+    attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE, related_name='trip_attractions')
     date = models.DateTimeField()
     visited = models.BooleanField(default=False)
     note = models.TextField(null=True)

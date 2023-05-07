@@ -32,6 +32,7 @@ class AttractionSerializer(serializers.ModelSerializer):
 
 
 class TripAttractionSerializer(serializers.ModelSerializer):
+    attraction = AttractionSerializer()
 
     class Meta:
         model = TripAttraction
@@ -111,3 +112,11 @@ class TripSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trip
         fields = ('id', 'start_date', 'end_date', 'budgets', 'destination', 'user')
+
+
+class TripDestinationSerializer(DestinationSerializer):
+    trip_attractions = TripAttractionSerializer(many=True)
+
+
+class TripDetailSerializer(TripSerializer):
+    destination = TripDestinationSerializer()

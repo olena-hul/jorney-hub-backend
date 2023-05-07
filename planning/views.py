@@ -1,4 +1,10 @@
+import calendar
+from collections import Counter, defaultdict
+from datetime import timedelta, datetime
+from http import HTTPStatus
+
 from rest_framework import generics
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,13 +13,19 @@ from rest_framework.viewsets import ModelViewSet
 from authentication.permissions import FirebaseAuthentication
 from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
-    BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer
+    BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer, TripDetailSerializer
 
 
 class DestinationListAPIView(generics.ListAPIView):
     queryset = Destination.objects.all()
     serializer_class = DestinationSerializer
     permission_classes = [AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        top = request.query_params.get('top')
+        if top:
+            self.queryset = self.queryset.order_by('-rating')[:int(top)]
+        return super().list(request, *args, **kwargs)
 
 
 class AttractionListAPIView(generics.ListAPIView):
@@ -23,7 +35,14 @@ class AttractionListAPIView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         destination_id = request.query_params.get('destination_id')
-        self.queryset = self.queryset.filter(destination__id=destination_id)
+        top = request.query_params.get('top')
+
+        if destination_id:
+            self.queryset = self.queryset.filter(destination__id=destination_id)
+
+        if top:
+            self.queryset = self.queryset.order_by('-rating')[:int(top)]
+
         return super().list(request, *args, **kwargs)
 
 
@@ -87,10 +106,17 @@ class TripViewSet(ModelViewSet):
     serializer_class = TripSerializer
     permission_classes = [FirebaseAuthentication]
 
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return TripDetailSerializer
+
+        return self.serializer_class
+
     def list(self, request, *args, **kwargs):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         destination_id = request.query_params.get('destination_id')
+        mine = request.query_params.get('mine')
         user = request.user
         
         if start_date and end_date and destination_id:
@@ -100,8 +126,57 @@ class TripViewSet(ModelViewSet):
                 destination_id=destination_id,
                 user=user,
             )
+
+        if mine:
+            self.queryset = self.queryset.filter(user=user).order_by('-created_at')
         
         return super().list(request, *args, **kwargs)
+
+    @action(url_path='trip-days', methods=['GET'], detail=False)
+    def get_trip_days(self, request, *args, **kwargs):
+        user = request.user
+
+        trips = Trip.objects.filter(user=user)
+
+        dates = []
+        for trip in trips:
+            start_date = trip.start_date
+            while start_date <= trip.end_date:
+                dates.append(start_date)
+                start_date += timedelta(days=1)
+
+        dates_dict = Counter(date.month for date in dates)
+
+        results = {
+            calendar.month_name[key]: value
+            for key, value in dates_dict.items()
+        }
+        return Response(data=results, status=HTTPStatus.OK)
+
+    @action(url_path='trip-expenses', methods=['GET'], detail=False)
+    def get_trip_expenses(self, request, *args, **kwargs):
+        user = request.user
+
+        trips = Trip.objects.prefetch_related('budgets', 'budgets__entries').filter(user=user)
+
+        results = defaultdict(int)
+        for trip in trips:
+            budget = trip.budgets.first()
+            if not budget:
+                continue
+            for entry in budget.entries.all():
+                results[entry.category] += entry.amount_spent
+
+        return Response(data=results, status=HTTPStatus.OK)
+
+    @action(url_path='visited-places', methods=['GET'], detail=False)
+    def get_visited_places(self, request, *args, **kwargs):
+        user = request.user
+        destinations = Destination.objects.filter(
+            id__in=Trip.objects.filter(user=user, end_date__lt=datetime.now()).values('destination')
+        )
+        results = DestinationSerializer(destinations, many=True)
+        return Response(data=results.data, status=HTTPStatus.OK)
 
 
 class TripAttractionViewSet(ModelViewSet):
