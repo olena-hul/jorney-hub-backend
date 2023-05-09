@@ -8,12 +8,6 @@ class ExcursionAttractionSerializer(serializers.ModelSerializer):
         fields = ['id', 'attraction', 'start_time', 'end_time', 'description']
 
 
-class ExcursionBookingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ExcursionBooking
-        fields = ['user', 'excursion', 'adults_count', 'children_count', 'phone_number', 'session_url']
-
-
 class ExcursionSerializer(serializers.ModelSerializer):
     excursion_attractions = ExcursionAttractionSerializer(many=True)
 
@@ -29,6 +23,17 @@ class ExcursionSerializer(serializers.ModelSerializer):
         ]
         ExcursionAttraction.objects.bulk_create(excursion_attractions_instances)
         return excursion
+
+
+class ExcursionBookingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ExcursionBooking
+        fields = ['user', 'excursion', 'adults_count', 'children_count', 'phone_number', 'session_url']
+
+
+class ExcursionBookingListSerializer(ExcursionBookingSerializer):
+    excursion = ExcursionSerializer()
 
 
 class ExcursionUpdateSerializer(serializers.ModelSerializer):

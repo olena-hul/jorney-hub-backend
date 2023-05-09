@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
+from ratings.serializers import RateSerializer
 from tasks.trip_suggestion import suggest_trip_task
 from .models import Destination, Location, Trip, BudgetEntry, Budget, Attraction, TripAttraction, CustomImage
 
@@ -26,14 +27,23 @@ class DestinationSerializer(serializers.ModelSerializer):
         exclude = ['rates']
 
 
+class CustomImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ['image_url']
+        model = CustomImage
+
+
 class AttractionSerializer(serializers.ModelSerializer):
     location = LocationSerializer(many=False)
     rating = serializers.FloatField()
     ratings_count = serializers.IntegerField()
+    custom_images = CustomImageSerializer(many=True)
+    rates = RateSerializer(many=True)
 
     class Meta:
         model = Attraction
-        exclude = ['rates']
+        fields = '__all__'
 
 
 class TripAttractionSerializer(serializers.ModelSerializer):

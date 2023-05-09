@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from authentication.permissions import FirebaseAuthentication
 from excursions.models import Excursion, ExcursionAttraction, ExcursionBooking
 from excursions.serializers import ExcursionSerializer, ExcursionUpdateSerializer, ExcursionAttractionSerializer, \
-    ExcursionBookingSerializer
+    ExcursionBookingSerializer, ExcursionBookingListSerializer
 from services.payment.stripe_service import StripeClient
 
 
@@ -55,6 +55,20 @@ class ExcursionBookingViewSet(ModelViewSet):
     queryset = ExcursionBooking.objects.all()
     serializer_class = ExcursionBookingSerializer
     permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ExcursionBookingListSerializer
+        return self.serializer_class
+
+    def list(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id')
+        if user_id:
+            self.queryset = self.queryset.filter(
+                user_id=user_id
+            ).order_by('-excursion__date')
+
+        return super().list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

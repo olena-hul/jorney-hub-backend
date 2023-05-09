@@ -1,8 +1,8 @@
 from django.db import models
-from django.db.models import CASCADE, Sum, Count, Avg
+from django.db.models import CASCADE, Avg
 
 from authentication.models import User
-from journey_hub.constants import ATTRACTION_TYPES, BUDGET_CATEGORIES, CURRENCY_RATES_FROM_USD
+from journey_hub.constants import ATTRACTION_TYPES, BUDGET_CATEGORIES
 from journey_hub.models import AbstractBaseModel
 
 
