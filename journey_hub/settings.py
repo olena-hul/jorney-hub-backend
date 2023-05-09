@@ -36,7 +36,7 @@ SECRET_KEY = "django-insecure-8=d1*alo2mr*3@zo3dmdwhyr=$k5r8=l4uitx0kjp8sfy3bxpi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 
 AUTH_USER_MODEL = "authentication.User"
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'planning',
     'credentials',
+    'excursions',
 ]
 
 MIDDLEWARE = [
@@ -161,6 +162,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 
 APP_HOST = os.getenv('APP_HOST')
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
 
 CHANNEL_LAYERS = {
     "default": {

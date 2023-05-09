@@ -56,3 +56,8 @@ ATTRACTION_TYPE_CATEGORY_MAPPING = {
 class WSEvent:
     TRIP_SUGGESTION = 'trip_suggestion'
     IMAGE_READY = 'image_ready'
+
+
+CURRENCY_MAPPING = {
+    '$': 'usd'
+}
