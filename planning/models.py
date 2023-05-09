@@ -60,6 +60,16 @@ class TripAttraction(AbstractBaseModel):
     currency = models.CharField(max_length=3, null=True)
 
 
+class CustomExpense(AbstractBaseModel):
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='custom_expenses')
+    attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE, related_name='custom_expenses')
+    date = models.DateTimeField()
+    description = models.TextField(null=True)
+    price = models.DecimalField(default=0, decimal_places=2, max_digits=10)
+    currency = models.CharField(max_length=3, null=True)
+    budget_category = models.CharField(max_length=255, choices=[(category, category) for category in BUDGET_CATEGORIES])
+
+
 class SuggestionResults(AbstractBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='suggestion_results', null=True)
     prompt_data = models.JSONField()

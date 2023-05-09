@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'planning',
+    'credentials',
 ]
 
 MIDDLEWARE = [
@@ -156,9 +157,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-CHAT_GPT_AUTHORIZATION = os.getenv('CHAT_GPT_AUTHORIZATION')
-CHAT_GPT_COOKIE = os.getenv('CHAT_GPT_COOKIE')
 
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 

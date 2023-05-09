@@ -2,8 +2,8 @@ import logging
 import uuid
 
 import requests
-from django.conf import settings
 
+from credentials.models import ChatGPTCredentials
 from journey_hub.constants import ATTRACTION_TYPES
 
 logger = logging.getLogger(__name__)
@@ -38,10 +38,22 @@ class BaseAIClient:
             'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 '
             '(KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36'
         )
-        self.authorization = settings.CHAT_GPT_AUTHORIZATION
-        self.cookie = settings.CHAT_GPT_COOKIE
+        self.authorization = ''
+        self.cookie = ''
         self.conversation_id = ''
         self.parent_message_id = ''
+
+        self.get_credentials()
+
+    def get_credentials(self):
+        query = ChatGPTCredentials.objects.filter(
+            key__in=['access_token', 'cookies', 'user_agent']
+        ).values('key', 'value')
+
+        results = {item['key']: item['value'] for item in query}
+        self.authorization = results.get('access_token')
+        self.cookie = results.get('cookie')
+        self.user_agent = results.get('user_agent')
 
     @property
     def headers(self):
