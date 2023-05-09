@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'planning',
     'credentials',
     'excursions',
+    'ratings',
 ]
 
 MIDDLEWARE = [
@@ -163,6 +164,7 @@ PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 
 APP_HOST = os.getenv('APP_HOST')
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+STORAGE_BUCKET_NAME = os.getenv('STORAGE_BUCKET_NAME')
 
 CHANNEL_LAYERS = {
     "default": {

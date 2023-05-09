@@ -143,3 +143,4 @@ websocket-client==1.5.1
 widgetsnbextension==4.0.5
 
 stripe~=5.4.0
+Pillow~=9.5.0

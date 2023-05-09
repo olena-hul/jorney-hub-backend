@@ -1,7 +1,8 @@
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 from tasks.trip_suggestion import suggest_trip_task
-from .models import Destination, Location, Trip, BudgetEntry, Budget, Attraction, TripAttraction
+from .models import Destination, Location, Trip, BudgetEntry, Budget, Attraction, TripAttraction, CustomImage
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -120,3 +121,9 @@ class TripDestinationSerializer(DestinationSerializer):
 
 class TripDetailSerializer(TripSerializer):
     destination = TripDestinationSerializer()
+
+
+class ImageSerializer(ModelSerializer):
+    class Meta:
+        model = CustomImage
+        fields = '__all__'

@@ -1,9 +1,10 @@
 import calendar
+import uuid
 from collections import Counter, defaultdict
 from datetime import timedelta, datetime
 from http import HTTPStatus
 
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -11,9 +12,11 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from authentication.permissions import FirebaseAuthentication
+from services.image_upload.firebase import FirebaseStorageClient
 from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
-    BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer, TripDetailSerializer
+    BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer, TripDetailSerializer, \
+    ImageSerializer
 
 
 class DestinationListAPIView(generics.ListAPIView):
@@ -189,3 +192,23 @@ class TripAttractionViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=201)
+
+
+class ImageUploadView(APIView):
+    permission_classes = [FirebaseAuthentication]
+
+    def post(self, request):
+        file = request.FILES.get('image')
+        image_url = FirebaseStorageClient().upload(
+            image=file,
+            name=f'Attraction-{uuid.uuid4()}'
+        )
+        data = {
+            'user': request.POST.get('user'),
+            'attraction': request.POST.get('attraction'),
+            'image_url': image_url,
+        }
+        serializer = ImageSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

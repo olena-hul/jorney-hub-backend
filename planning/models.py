@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import CASCADE
 
 from authentication.models import User
 from journey_hub.constants import ATTRACTION_TYPES, BUDGET_CATEGORIES
@@ -26,6 +27,8 @@ class Destination(AbstractBaseModel):
     views_count = models.IntegerField()
     image_urls = models.JSONField()
 
+    rates = models.ManyToManyField('ratings.Rate', related_name='destinations')
+
 
 class Trip(AbstractBaseModel):
     start_date = models.DateField()
@@ -48,6 +51,8 @@ class Attraction(AbstractBaseModel):
     image_urls = models.JSONField(null=True)
     duration = models.IntegerField(default=1)
     budget_category = models.CharField(max_length=255, choices=[(category, category) for category in BUDGET_CATEGORIES])
+
+    rates = models.ManyToManyField('ratings.Rate', related_name='attractions')
 
 
 class TripAttraction(AbstractBaseModel):
@@ -87,3 +92,9 @@ class BudgetEntry(AbstractBaseModel):
     estimated_amount = models.DecimalField(default=0, decimal_places=2, max_digits=10)
     amount_spent = models.DecimalField(default=0, decimal_places=2, max_digits=10)
     category = models.CharField(max_length=255, choices=[(category, category) for category in BUDGET_CATEGORIES])
+
+
+class CustomImage(AbstractBaseModel):
+    user = models.ForeignKey(User, related_name='custom_images', on_delete=CASCADE)
+    image_url = models.TextField()
+    attraction = models.ForeignKey(Attraction, related_name='custom_images', on_delete=CASCADE)

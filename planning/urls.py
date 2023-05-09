@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from .views import (
     DestinationListAPIView, SuggestTripAPIView, BudgetViewSet, BudgetEntryViewSet, TripViewSet, AttractionListAPIView,
-    TripAttractionViewSet,
+    TripAttractionViewSet, ImageUploadView,
 )
 
 router = routers.DefaultRouter()
@@ -17,5 +17,6 @@ urlpatterns = [
     path('destinations/', DestinationListAPIView.as_view(), name='destination-list'),
     path('suggest-trip/', SuggestTripAPIView.as_view(), name='suggest-trip-view'),
     path('attractions/', AttractionListAPIView.as_view(), name='attraction-list'),
+    path('image-upload/', ImageUploadView.as_view(), name='upload-image'),
     path('', include(router.urls)),
 ]
