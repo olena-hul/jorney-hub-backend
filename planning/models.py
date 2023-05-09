@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import CASCADE, Sum, Count, Avg
 
 from authentication.models import User
-from journey_hub.constants import ATTRACTION_TYPES, BUDGET_CATEGORIES
+from journey_hub.constants import ATTRACTION_TYPES, BUDGET_CATEGORIES, CURRENCY_RATES_FROM_USD
 from journey_hub.models import AbstractBaseModel
 
 
@@ -68,7 +68,7 @@ class Attraction(AbstractBaseModel):
 
 
 class TripAttraction(AbstractBaseModel):
-    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='trip_attractions')
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='trip_attractions')
     attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE, related_name='trip_attractions')
     date = models.DateTimeField()
     visited = models.BooleanField(default=False)
@@ -78,7 +78,7 @@ class TripAttraction(AbstractBaseModel):
 
 
 class CustomExpense(AbstractBaseModel):
-    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='custom_expenses')
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='custom_expenses')
     attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE, related_name='custom_expenses')
     date = models.DateTimeField()
     description = models.TextField(null=True)

@@ -4,6 +4,7 @@ from http import HTTPStatus
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
+from journey_hub.constants import CURRENCY_RATES_FROM_USD
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +56,9 @@ def custom_exception_handler(exc, _):
 
     error = str(exc)
     return ApiResponse(error=error, status=status)
+
+
+def get_price_in_usd(price, currency):
+    if currency != '$':
+        price = price / CURRENCY_RATES_FROM_USD[currency]
+    return price

@@ -13,8 +13,9 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from authentication.permissions import FirebaseAuthentication
+from journey_hub.utils import get_price_in_usd
 from services.image_upload.firebase import FirebaseStorageClient
-from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction
+from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction, CustomExpense
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
     BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer, TripDetailSerializer, \
     ImageSerializer
@@ -161,15 +162,26 @@ class TripViewSet(ModelViewSet):
     def get_trip_expenses(self, request, *args, **kwargs):
         user = request.user
 
-        trips = Trip.objects.prefetch_related('budgets', 'budgets__entries').filter(user=user)
+        trip_attractions = TripAttraction.objects.filter(
+            trip__user=user,
+            visited=True,
+        )
+        custom_expenses = CustomExpense.objects.filter(
+            trip__user=user
+        )
 
         results = defaultdict(int)
-        for trip in trips:
-            budget = trip.budgets.first()
-            if not budget:
-                continue
-            for entry in budget.entries.all():
-                results[entry.category] += entry.amount_spent
+        for trip_attraction in trip_attractions:
+            results[trip_attraction.attraction.budget_category] += get_price_in_usd(
+                trip_attraction.price,
+                trip_attraction.currency
+            )
+
+        for custom_expense in custom_expenses:
+            results[custom_expense.budget_category] += get_price_in_usd(
+                custom_expense.price,
+                custom_expense.currency
+            )
 
         return Response(data=results, status=HTTPStatus.OK)
 
