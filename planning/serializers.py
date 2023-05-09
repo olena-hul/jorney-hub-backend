@@ -13,6 +13,8 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class DestinationSerializer(serializers.ModelSerializer):
     location = LocationSerializer(many=False)
+    rating = serializers.FloatField()
+    ratings_count = serializers.IntegerField()
 
     def get_fields(self):
         fields = super(DestinationSerializer, self).get_fields()
@@ -21,15 +23,17 @@ class DestinationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Destination
-        fields = '__all__'
+        exclude = ['rates']
 
 
 class AttractionSerializer(serializers.ModelSerializer):
     location = LocationSerializer(many=False)
+    rating = serializers.FloatField()
+    ratings_count = serializers.IntegerField()
 
     class Meta:
         model = Attraction
-        fields = '__all__'
+        exclude = ['rates']
 
 
 class TripAttractionSerializer(serializers.ModelSerializer):

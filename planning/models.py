@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import CASCADE
+from django.db.models import CASCADE, Sum, Count, Avg
 
 from authentication.models import User
 from journey_hub.constants import ATTRACTION_TYPES, BUDGET_CATEGORIES
@@ -22,12 +22,18 @@ class Destination(AbstractBaseModel):
     destination_type = models.CharField(max_length=255, choices=DestinationType.choices)
     parent_destination = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='destinations')
-    rating = models.FloatField()
-    ratings_count = models.IntegerField()
     views_count = models.IntegerField()
     image_urls = models.JSONField()
 
     rates = models.ManyToManyField('ratings.Rate', related_name='destinations')
+
+    @property
+    def rating(self):
+        return self.rates.aggregate(avg_rating=Avg('value'))['avg_rating']
+
+    @property
+    def ratings_count(self):
+        return self.rates.count()
 
 
 class Trip(AbstractBaseModel):
@@ -43,8 +49,6 @@ class Attraction(AbstractBaseModel):
     attraction_type = models.CharField(max_length=255, choices=[(type_, type_) for type_ in ATTRACTION_TYPES])
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='attractions')
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='attractions')
-    rating = models.FloatField(default=0)
-    ratings_count = models.IntegerField(default=0)
     views_count = models.IntegerField(default=0)
     price = models.DecimalField(default=0, decimal_places=2, max_digits=10)
     address = models.CharField(max_length=255)
@@ -53,6 +57,14 @@ class Attraction(AbstractBaseModel):
     budget_category = models.CharField(max_length=255, choices=[(category, category) for category in BUDGET_CATEGORIES])
 
     rates = models.ManyToManyField('ratings.Rate', related_name='attractions')
+
+    @property
+    def rating(self):
+        return self.rates.aggregate(avg_rating=Avg('value'))['avg_rating']
+
+    @property
+    def ratings_count(self):
+        return self.rates.count()
 
 
 class TripAttraction(AbstractBaseModel):

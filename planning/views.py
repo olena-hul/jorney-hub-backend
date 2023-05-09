@@ -4,6 +4,7 @@ from collections import Counter, defaultdict
 from datetime import timedelta, datetime
 from http import HTTPStatus
 
+from django.db.models import Subquery, Avg
 from rest_framework import generics, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -27,7 +28,7 @@ class DestinationListAPIView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         top = request.query_params.get('top')
         if top:
-            self.queryset = self.queryset.order_by('-rating')[:int(top)]
+            self.queryset = self.queryset.annotate(avg_rating=Avg('rates__value')).order_by('-avg_rating')[:int(top)]
         return super().list(request, *args, **kwargs)
 
 
@@ -44,7 +45,7 @@ class AttractionListAPIView(generics.ListAPIView):
             self.queryset = self.queryset.filter(destination__id=destination_id)
 
         if top:
-            self.queryset = self.queryset.order_by('-rating')[:int(top)]
+            self.queryset = self.queryset.annotate(avg_rating=Avg('rates__value')).order_by('-avg_rating')[:int(top)]
 
         return super().list(request, *args, **kwargs)
 
