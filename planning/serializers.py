@@ -123,6 +123,7 @@ class BudgetUpdateSerializer(serializers.ModelSerializer):
 
 class TripSerializer(serializers.ModelSerializer):
     budgets = BudgetSerializer(read_only=True, many=True)
+    destination = DestinationSerializer()
 
     class Meta:
         model = Trip

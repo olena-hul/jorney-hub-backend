@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from authentication.permissions import FirebaseAuthentication
+from journey_hub.constants import BUDGET_CATEGORIES
 from journey_hub.utils import get_price_in_usd
 from services.image_upload.firebase import FirebaseStorageClient
 from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction, CustomExpense
@@ -152,10 +153,14 @@ class TripViewSet(ModelViewSet):
 
         dates_dict = Counter(date.month for date in dates)
 
-        results = {
+        all_months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
+        results = {month: 0 for month in all_months}
+
+        results.update({
             calendar.month_name[key]: value
             for key, value in dates_dict.items()
-        }
+        })
+
         return Response(data=results, status=HTTPStatus.OK)
 
     @action(url_path='trip-expenses', methods=['GET'], detail=False)
@@ -170,7 +175,8 @@ class TripViewSet(ModelViewSet):
             trip__user=user
         )
 
-        results = defaultdict(int)
+        results = {category: 0 for category in BUDGET_CATEGORIES}
+
         for trip_attraction in trip_attractions:
             results[trip_attraction.attraction.budget_category] += get_price_in_usd(
                 trip_attraction.price,
@@ -189,7 +195,7 @@ class TripViewSet(ModelViewSet):
     def get_visited_places(self, request, *args, **kwargs):
         user = request.user
         destinations = Destination.objects.filter(
-            id__in=Trip.objects.filter(user=user, end_date__lt=datetime.now()).values('destination')
+            trips__id__in=Trip.objects.filter(user=user, end_date__lt=datetime.now()).values('destination')
         )
         results = DestinationSerializer(destinations, many=True)
         return Response(data=results.data, status=HTTPStatus.OK)
