@@ -3,7 +3,8 @@ from rest_framework.serializers import ModelSerializer
 
 from ratings.serializers import RateSerializer
 from tasks.trip_suggestion import suggest_trip_task
-from .models import Destination, Location, Trip, BudgetEntry, Budget, Attraction, TripAttraction, CustomImage
+from .models import Destination, Location, Trip, BudgetEntry, Budget, Attraction, TripAttraction, CustomImage, \
+    CustomExpense
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -43,6 +44,12 @@ class AttractionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attraction
+        fields = '__all__'
+
+
+class TripAttractionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TripAttraction
         fields = '__all__'
 
 
@@ -123,22 +130,31 @@ class BudgetUpdateSerializer(serializers.ModelSerializer):
 
 class TripSerializer(serializers.ModelSerializer):
     budgets = BudgetSerializer(read_only=True, many=True)
-    destination = DestinationSerializer()
 
     class Meta:
         model = Trip
         fields = ('id', 'start_date', 'end_date', 'budgets', 'destination', 'user')
 
 
-class TripDestinationSerializer(DestinationSerializer):
-    trip_attractions = TripAttractionSerializer(many=True)
+class CustomExpenseSerializer(serializers.ModelSerializer):
+    attraction = AttractionSerializer()
 
-
-class TripDetailSerializer(TripSerializer):
-    destination = TripDestinationSerializer()
+    class Meta:
+        model = CustomExpense
+        fields = ('date', 'description', 'trip', 'attraction', 'price', 'currency', 'budget_category')
 
 
 class ImageSerializer(ModelSerializer):
     class Meta:
         model = CustomImage
         fields = '__all__'
+
+
+class TripDetailSerializer(TripSerializer):
+    trip_attractions = TripAttractionSerializer(many=True)
+    custom_expenses = CustomExpenseSerializer(many=True)
+    destination = DestinationSerializer()
+
+    class Meta:
+        model = Trip
+        fields = TripSerializer.Meta.fields + ('trip_attractions', 'custom_expenses')

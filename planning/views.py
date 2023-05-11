@@ -19,7 +19,7 @@ from services.image_upload.firebase import FirebaseStorageClient
 from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction, CustomExpense
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
     BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer, TripDetailSerializer, \
-    ImageSerializer
+    ImageSerializer, TripAttractionCreateSerializer
 
 
 class DestinationListAPIView(generics.ListAPIView):
@@ -113,6 +113,9 @@ class TripViewSet(ModelViewSet):
     permission_classes = [FirebaseAuthentication]
 
     def get_serializer_class(self):
+        if self.action == 'list' and self.request.query_params.get('mine'):
+            return TripDetailSerializer
+
         if self.action == 'retrieve':
             return TripDetailSerializer
 
@@ -205,6 +208,11 @@ class TripAttractionViewSet(ModelViewSet):
     queryset = TripAttraction.objects.all()
     serializer_class = TripAttractionSerializer
     permission_classes = [FirebaseAuthentication]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return TripAttractionCreateSerializer
+        return self.serializer_class
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, many=True)
