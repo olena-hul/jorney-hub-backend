@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from authentication.permissions import FirebaseAuthentication
 from excursions.models import Excursion, ExcursionAttraction, ExcursionBooking
 from excursions.serializers import ExcursionSerializer, ExcursionUpdateSerializer, ExcursionAttractionSerializer, \
-    ExcursionBookingSerializer, ExcursionBookingListSerializer
+    ExcursionBookingSerializer, ExcursionBookingListSerializer, ExcursionDetailSerializer
 from services.payment.stripe_service import StripeClient
 
 
@@ -18,6 +18,8 @@ class ExcursionViewSet(ModelViewSet):
     permission_classes = [FirebaseAuthentication]
 
     def get_serializer_class(self):
+        if self.action == 'list':
+            return ExcursionDetailSerializer
         if self.action == 'update':
             return ExcursionUpdateSerializer
         return ExcursionSerializer

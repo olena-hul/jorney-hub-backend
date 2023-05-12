@@ -1,8 +1,18 @@
 from rest_framework import serializers
+
+from planning.serializers import AttractionSerializer
 from .models import Excursion, ExcursionAttraction, ExcursionBooking
 
 
 class ExcursionAttractionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExcursionAttraction
+        fields = ['id', 'attraction', 'start_time', 'end_time', 'description']
+
+
+class ExcursionAttractionDetailSerializer(serializers.ModelSerializer):
+    attraction = AttractionSerializer()
+
     class Meta:
         model = ExcursionAttraction
         fields = ['id', 'attraction', 'start_time', 'end_time', 'description']
@@ -25,6 +35,10 @@ class ExcursionSerializer(serializers.ModelSerializer):
         return excursion
 
 
+class ExcursionDetailSerializer(ExcursionSerializer):
+    excursion_attractions = ExcursionAttractionDetailSerializer(many=True)
+
+
 class ExcursionBookingSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -33,7 +47,7 @@ class ExcursionBookingSerializer(serializers.ModelSerializer):
 
 
 class ExcursionBookingListSerializer(ExcursionBookingSerializer):
-    excursion = ExcursionSerializer()
+    excursion = ExcursionDetailSerializer()
 
 
 class ExcursionUpdateSerializer(serializers.ModelSerializer):
