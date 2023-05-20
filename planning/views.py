@@ -91,11 +91,15 @@ class BudgetViewSet(ModelViewSet):
 
         # Update the budget entry instances
         for entry_data in entries_data:
-            entry_id = entry_data.pop('id')
-            entry = BudgetEntry.objects.get(pk=entry_id)
-            entry_serializer = BudgetEntrySerializer(entry, data=entry_data, partial=True)
-            entry_serializer.is_valid(raise_exception=True)
-            entry_serializer.save()
+            entry_id = entry_data.pop('id', None)
+            if entry_id:
+                entry = BudgetEntry.objects.get(pk=entry_id)
+                entry_serializer = BudgetEntrySerializer(entry, data=entry_data, partial=True)
+                entry_serializer.is_valid(raise_exception=True)
+                entry_serializer.save()
+            else:
+                entry = BudgetEntry.objects.create(**entry_data, budget=instance)
+                entry.save()
 
         return Response(data=serializer.data)
 
