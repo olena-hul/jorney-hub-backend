@@ -1,10 +1,14 @@
 from rest_framework import serializers
 
+from authentication.serializers import UserSerializer
+from planning.models import Attraction
 from planning.serializers import AttractionSerializer
 from .models import Excursion, ExcursionAttraction, ExcursionBooking
 
 
 class ExcursionAttractionSerializer(serializers.ModelSerializer):
+    attraction = serializers.SlugRelatedField(queryset=Attraction.objects.all(), slug_field='name')
+
     class Meta:
         model = ExcursionAttraction
         fields = ['id', 'attraction', 'start_time', 'end_time', 'description']
@@ -36,6 +40,7 @@ class ExcursionSerializer(serializers.ModelSerializer):
 
 
 class ExcursionDetailSerializer(ExcursionSerializer):
+    guide = UserSerializer()
     excursion_attractions = ExcursionAttractionDetailSerializer(many=True)
 
 
@@ -43,7 +48,7 @@ class ExcursionBookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExcursionBooking
-        fields = ['user', 'excursion', 'adults_count', 'children_count', 'phone_number', 'session_url']
+        fields = ['user', 'excursion', 'adults_count', 'children_count', 'phone_number', 'session_url', 'payment_status']
 
 
 class ExcursionBookingListSerializer(ExcursionBookingSerializer):

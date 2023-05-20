@@ -8,8 +8,8 @@ stripe.api_key = settings.STRIPE_API_KEY
 
 class StripeClient:
     def __init__(self):
-        self.success_url = 'http://localhost:8000/'
-        self.fail_url = 'http://localhost:8000/'
+        self.success_url = f'{settings.FRONTEND_URL}payment/success'
+        self.fail_url = f'{settings.FRONTEND_URL}payment/fail'
 
     def create_session(self, price: str, currency: str, product_name: str, user_email: str):
         session = stripe.checkout.Session.create(

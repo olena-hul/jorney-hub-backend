@@ -8,6 +8,7 @@ from celery_worker import app
 from journey_hub.constants import ATTRACTION_TYPE_CATEGORY_MAPPING, WSEvent
 from planning.models import SuggestionResults, Attraction, Location
 from services.ai.trip_suggestion import TripSuggestionAI
+from services.ai.trip_suggestion_new import TripSuggestionAINew
 from services.image_fetcher.api import ImageFetcherAPI
 from services.ws.consumer import WebsocketClient
 
@@ -86,7 +87,7 @@ def process_generated_attraction(generated_attraction: dict, prompt_data: dict):
 
 @app.task(name='suggest_trip_task', bind=True)
 def suggest_trip_task(_, prompt_data: dict):
-    trip_suggestion = TripSuggestionAI()
+    trip_suggestion = TripSuggestionAINew()
     result = trip_suggestion.request(prompt_data)
 
     if not result:

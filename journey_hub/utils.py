@@ -60,5 +60,5 @@ def custom_exception_handler(exc, _):
 
 def get_price_in_usd(price, currency):
     if currency != '$':
-        price = price / CURRENCY_RATES_FROM_USD[currency]
+        price = float(price) / CURRENCY_RATES_FROM_USD[currency]
     return price

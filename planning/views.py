@@ -19,7 +19,7 @@ from services.image_upload.firebase import FirebaseStorageClient
 from .models import Destination, Budget, BudgetEntry, Trip, Attraction, TripAttraction, CustomExpense
 from .serializers import DestinationSerializer, SuggestTripSerializer, BudgetSerializer, BudgetEntrySerializer, \
     BudgetUpdateSerializer, TripSerializer, AttractionSerializer, TripAttractionSerializer, TripDetailSerializer, \
-    ImageSerializer, TripAttractionCreateSerializer
+    ImageSerializer, TripAttractionCreateSerializer, CustomExpenseSerializer, CustomExpenseCreateSerializer
 
 
 class DestinationListAPIView(generics.ListAPIView):
@@ -181,16 +181,16 @@ class TripViewSet(ModelViewSet):
         results = {category: 0 for category in BUDGET_CATEGORIES}
 
         for trip_attraction in trip_attractions:
-            results[trip_attraction.attraction.budget_category] += get_price_in_usd(
+            results[trip_attraction.attraction.budget_category] += float(get_price_in_usd(
                 trip_attraction.price,
                 trip_attraction.currency
-            )
+            ))
 
         for custom_expense in custom_expenses:
-            results[custom_expense.budget_category] += get_price_in_usd(
+            results[custom_expense.budget_category] += float(get_price_in_usd(
                 custom_expense.price,
                 custom_expense.currency
-            )
+            ))
 
         return Response(data=results, status=HTTPStatus.OK)
 
@@ -219,6 +219,17 @@ class TripAttractionViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=201)
+
+
+class CustomExpenseViewSet(ModelViewSet):
+    queryset = CustomExpense.objects.all()
+    serializer_class = CustomExpenseSerializer
+    permission_classes = [FirebaseAuthentication]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CustomExpenseCreateSerializer
+        return self.serializer_class
 
 
 class ImageUploadView(APIView):

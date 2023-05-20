@@ -141,6 +141,14 @@ class CustomExpenseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomExpense
+        fields = ('id', 'date', 'description', 'trip', 'attraction', 'price', 'currency', 'budget_category')
+
+
+class CustomExpenseCreateSerializer(serializers.ModelSerializer):
+    attraction = serializers.SlugRelatedField(queryset=Attraction.objects.all(), slug_field='name')
+
+    class Meta:
+        model = CustomExpense
         fields = ('date', 'description', 'trip', 'attraction', 'price', 'currency', 'budget_category')
 
 

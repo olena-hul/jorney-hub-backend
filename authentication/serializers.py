@@ -78,3 +78,33 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def update(self, instance: User, validated_data):
+        email = validated_data.get('email')
+        password = validated_data.get('password')
+
+        firebase_kwargs = {}
+        if email:
+            firebase_kwargs['email'] = email
+        if password:
+            firebase_kwargs['password'] = password
+
+        try:
+            auth.update_user(
+                instance.firebase_user_id,
+                **firebase_kwargs
+            )
+        except Exception as e:
+            raise FirebaseException(f'Error while updating user on firebase: {e}')
+
+        instance.email = email or instance.email
+        instance.first_name = validated_data.get('first_name') or instance.first_name
+        instance.last_name = validated_data.get('last_name') or instance.last_name
+        instance.save()
+        return instance

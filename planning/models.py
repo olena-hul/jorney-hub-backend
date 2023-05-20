@@ -110,3 +110,6 @@ class CustomImage(AbstractBaseModel):
     user = models.ForeignKey(User, related_name='custom_images', on_delete=CASCADE)
     image_url = models.TextField()
     attraction = models.ForeignKey(Attraction, related_name='custom_images', on_delete=CASCADE)
+
+    class Meta:
+        ordering = ['-created_at']

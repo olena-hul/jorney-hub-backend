@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from authentication.models import User
+from authentication.serializers import UserSerializer
 from planning.models import Destination, Attraction
 from ratings.models import Rate
 
@@ -8,6 +10,7 @@ from ratings.models import Rate
 class RateSerializer(serializers.ModelSerializer):
     destination = serializers.SlugRelatedField(queryset=Destination.objects.all(), slug_field='id', required=False)
     attraction = serializers.SlugRelatedField(queryset=Attraction.objects.all(), slug_field='id', required=False)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Rate
@@ -33,3 +36,7 @@ class RateSerializer(serializers.ModelSerializer):
             rate.attractions.add(attraction)
         rate.save()
         return rate
+
+
+class RateCreateSerializer(RateSerializer):
+    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='id')

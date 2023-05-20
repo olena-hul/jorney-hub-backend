@@ -1,5 +1,6 @@
 import logging
 
+from firebase_admin.auth import InvalidIdTokenError
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 

@@ -165,6 +165,8 @@ PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 APP_HOST = os.getenv('APP_HOST')
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
 STORAGE_BUCKET_NAME = os.getenv('STORAGE_BUCKET_NAME')
+FRONTEND_URL = os.getenv('FRONTEND_URL')
+CHAT_GPT_TOKEN = os.getenv('CHAT_GPT_TOKEN')
 
 CHANNEL_LAYERS = {
     "default": {
