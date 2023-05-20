@@ -38,7 +38,7 @@ class UserRegistrationSerializerGoogleAuth(BaseUserRegistrationSerializer):
             raise FirebaseException(f'User is not verified')
 
         validated_data['firebase_user_id'] = uid
-        user, _ = User.objects.get_or_create(**validated_data)
+        user, _ = User.objects.get_or_create(firebase_user_id=uid, defaults=validated_data)
         return user
 
 
