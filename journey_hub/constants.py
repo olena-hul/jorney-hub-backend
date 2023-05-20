@@ -59,7 +59,9 @@ class WSEvent:
 
 
 CURRENCY_MAPPING = {
-    '$': 'usd'
+    '$': 'usd',
+    '€': 'eur',
+    '₴': 'uah',
 }
 
 
