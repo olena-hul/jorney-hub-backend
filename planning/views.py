@@ -4,6 +4,7 @@ from collections import Counter, defaultdict
 from datetime import timedelta, datetime
 from http import HTTPStatus
 
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Subquery, Avg
 from rest_framework import generics, status
 from rest_framework.decorators import action
@@ -12,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from authentication.permissions import FirebaseAuthentication
+from authentication.permissions import FirebaseAuthentication, AnonymousOrAuthorized
 from journey_hub.constants import BUDGET_CATEGORIES
 from journey_hub.utils import get_price_in_usd
 from services.image_upload.firebase import FirebaseStorageClient
@@ -54,14 +55,14 @@ class AttractionListAPIView(generics.ListAPIView):
 
 class SuggestTripAPIView(APIView):
     serializer_class = SuggestTripSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AnonymousOrAuthorized]
 
     def post(self, request):
         data = request.data
         user = getattr(request, 'user', None)
 
-        if user:
-            data['user_id'] = user.id
+        if not isinstance(user, AnonymousUser):
+            data['user'] = user
 
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
@@ -202,7 +203,7 @@ class TripViewSet(ModelViewSet):
     def get_visited_places(self, request, *args, **kwargs):
         user = request.user
         destinations = Destination.objects.filter(
-            trips__id__in=Trip.objects.filter(user=user, end_date__lt=datetime.now()).values('destination')
+            trips__id__in=Trip.objects.filter(user=user, end_date__lt=datetime.now())
         )
         results = DestinationSerializer(destinations, many=True)
         return Response(data=results.data, status=HTTPStatus.OK)

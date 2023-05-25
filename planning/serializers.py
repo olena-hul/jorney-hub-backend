@@ -69,13 +69,14 @@ class SuggestTripSerializer(serializers.Serializer):
     currency = serializers.CharField(required=True)
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
+        self.user = kwargs.get('data', {}).pop('user', None)
         super().__init__(*args, **kwargs)
 
     def create(self, validated_data):
         if self.user:
-            trip = Trip.objects.get_or_create(
+            trip, _ = Trip.objects.get_or_create(
                 user=self.user,
+                destination=validated_data.get('destination'),
                 start_date=validated_data.get('start_date'),
                 end_date=validated_data.get('end_date')
             )
