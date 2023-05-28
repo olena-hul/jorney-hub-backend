@@ -1,8 +1,6 @@
-import io
 import logging
 from typing import Optional
 
-from PIL import Image
 from django.conf import settings
 from firebase_admin import storage
 
@@ -15,7 +13,7 @@ class FirebaseStorageClient(BaseStorageClient):
     def __init__(self):
         self.bucket = storage.bucket(settings.STORAGE_BUCKET_NAME)
 
-    def upload(self, image: Image, name: str) -> Optional[str]:
+    def upload(self, image, name: str) -> Optional[str]:
         try:
             blob = self.bucket.blob(name)
             blob.upload_from_string(image.read(), content_type="image/png")
